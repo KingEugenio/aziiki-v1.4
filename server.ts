@@ -7,6 +7,7 @@ import { env } from "./src/server/env";
 
 import express from "express";
 import path from "path";
+import { fileURLToPath } from "url";
 import fs from "fs";
 import mime from "mime-types";
 import { createServer as createViteServer } from "vite";
@@ -268,15 +269,23 @@ async function startServer() {
     if (res.headersSent) return;
     res.status(500).json({ error: "Something went wrong on our end. Please try again shortly." });
   });
+  return app;
+}
 
+let appInstance: express.Express | null = null;
+
+export async function getApp(): Promise<express.Express> {
+  if (appInstance) return appInstance;
+  appInstance = await startServer();
+  return appInstance;
+}
+
+async function startLocalServer() {
+  const app = await getApp();
   app.listen(env.PORT, "0.0.0.0", () => {
     console.log(`[aziiki] server listening on http://0.0.0.0:${env.PORT} [env: ${env.NODE_ENV}]`);
   });
 
-  // Overdue-invoice reminders have no single request to trigger them, so
-  // they run on a plain timer within this same long-lived process instead -
-  // once shortly after boot (so a restart doesn't wait 6 hours for the
-  // first check), then on a steady interval after that.
   const OVERDUE_SWEEP_INTERVAL_MS = 6 * 60 * 60 * 1000;
   setTimeout(() => {
     runOverdueInvoiceSweep().catch((err) => console.error("[overdue sweep] failed:", err));
@@ -286,4 +295,11 @@ async function startServer() {
   }, OVERDUE_SWEEP_INTERVAL_MS);
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startLocalServer();
+}
+
+export default async function handler(req: express.Request, res: express.Response) {
+  const app = await getApp();
+  app(req, res);
+}
