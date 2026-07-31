@@ -1,0 +1,23 @@
+{
+  "name": "Aziiki",
+  "short_name": "Aziiki",
+  "description": "The free Business Operating System for African entrepreneurs.",
+  "theme_color": "#102A43",
+  "background_color": "#F8FAFC",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    {
+      "_comment": "Functional placeholder (the app's own mark on brand-navy) - swap for a final designer-produced icon before a serious marketing push.",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "_comment": "Functional placeholder (the app's own mark on brand-navy) - swap for a final designer-produced icon before a serious marketing push.",
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

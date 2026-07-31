@@ -1,0 +1,6 @@
+{
+  "name": "Aziiki",
+  "description": "An all-in-one free Business Operating System and financial ecosystem designed for African founders, freelancers, and small businesses to track cash flow, invoices, receipts, and investments with integrated AI guidance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

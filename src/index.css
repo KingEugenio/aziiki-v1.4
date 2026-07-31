@@ -1,0 +1,556 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AZIIKI DESIGN SYSTEM — v1
+   Phase 1 of the UI redesign: foundation tokens + primitives. Nothing in
+   this file changes any component's data, props, or behavior — it only
+   defines the vocabulary (color, type, space, radius, elevation, motion)
+   that redesigned screens draw from. See AZIIKI_DESIGN_SYSTEM.md for the
+   full reference and usage rules.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* Montserrat is the site-wide font - body copy, headings, onboarding, and
+     UI chrome all route through these three theme tokens, so this is the
+     only place it needs to be set. JetBrains Mono is kept for --font-mono
+     since it serves a structural purpose (fixed-width aligned digits/codes)
+     that a non-monospace font can't replace. */
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-heading: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-navy: #102A43;
+  --color-brand-teal: #006837;
+  --color-brand-amber: #F59E0B;
+
+  /* Onboarding flow design system (kept distinct from --color-brand-* above,
+     which are shades used by the rest of the dashboard). */
+  --color-onboard-teal: #1B5E7E;
+  --color-onboard-cream: #F8F5F0;
+  --color-onboard-green: #10B981;
+  --color-onboard-amber: #F59E0B;
+
+  --color-emerald-50: #e5f3ec;
+  --color-emerald-100: #cbe7da;
+  --color-emerald-200: #97cfb4;
+  --color-emerald-300: #64b78e;
+  --color-emerald-400: #319f68;
+  --color-emerald-500: #008745;
+  --color-emerald-600: #006837;
+  --color-emerald-700: #00502a;
+  --color-emerald-800: #00381d;
+  --color-emerald-900: #002010;
+  --color-emerald-950: #001008;
+
+  /* Radius scale — extends Tailwind's rounded-* utilities with two larger
+     steps so "premium card" and "sheet/modal" radii are consistent and
+     named, instead of every component picking its own rounded-[Npx]. */
+  --radius-xl: 1rem;      /* 16px - standard card */
+  --radius-2xl: 1.25rem;  /* 20px - elevated card / dialog */
+  --radius-3xl: 1.75rem;  /* 28px - hero panels, bottom sheets */
+  --radius-4xl: 2.25rem;  /* 36px - full-screen sheet top corners */
+
+  /* `animate-fade-in` is used across the app wherever a screen or panel
+     should ease in instead of popping into place. Registering it here (a
+     Tailwind v4 @theme animation token needs both this entry and the
+     matching @keyframes below) is what actually makes the class do
+     anything - every existing call site picks it up for free. */
+  --animate-fade-in: fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-in: scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slide-up 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────────────
+   SEMANTIC COLOR / ELEVATION TOKENS (runtime CSS custom properties, not
+   @theme). These are the ones that actually flip between light and dark —
+   @theme tokens above compile to static values, but a `.dark` class swap
+   needs plain custom properties so the SAME utility class (e.g.
+   bg-[var(--surface)]) resolves differently depending on the current
+   theme. Reference these with Tailwind's arbitrary-value syntax:
+   bg-[var(--surface)], text-[var(--text-primary)], etc.
+   ─────────────────────────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --surface-page: #F8FAFC;
+  --surface-card: #FFFFFF;
+  --surface-card-2: #F8FAFC;      /* nested/inset surface, e.g. a card inside a card */
+  --surface-overlay: rgba(15, 23, 42, 0.45);
+
+  /* Borders */
+  --border-subtle: rgba(226, 232, 240, 0.8);
+  --border-default: #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  /* Text */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #94A3B8;
+  --text-on-accent: #FFFFFF;
+
+  /* Semantic meaning colors — used consistently so users learn the system:
+     green = money in / good, rose = money out / risk, amber = needs
+     attention, teal/navy = brand accent, never decorative. */
+  --positive: #059669;
+  --positive-soft: #ECFDF5;
+  --negative: #E11D48;
+  --negative-soft: #FFF1F2;
+  --warning: #D97706;
+  --warning-soft: #FFFBEB;
+  --accent: #006837;
+  --accent-soft: #E5F3EC;
+  --accent-strong: #102A43;
+
+  /* Elevation — soft, directional, low-contrast shadows (premium fintech
+     style, not heavy drop-shadows). Higher levels = further off the page. */
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.03);
+  --shadow-2: 0 4px 16px -4px rgba(15, 23, 42, 0.06), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --shadow-3: 0 12px 28px -6px rgba(15, 23, 42, 0.10), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  --shadow-4: 0 24px 48px -12px rgba(15, 23, 42, 0.16), 0 8px 16px -4px rgba(15, 23, 42, 0.06);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --surface-page: #0B1220;
+  --surface-card: #131B2C;
+  --surface-card-2: #0F1729;
+  --surface-overlay: rgba(0, 0, 0, 0.6);
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-on-accent: #FFFFFF;
+
+  --positive: #34D399;
+  --positive-soft: rgba(52, 211, 153, 0.12);
+  --negative: #FB7185;
+  --negative-soft: rgba(251, 113, 133, 0.12);
+  --warning: #FBBF24;
+  --warning-soft: rgba(251, 191, 36, 0.12);
+  --accent: #10B981;
+  --accent-soft: rgba(16, 185, 129, 0.14);
+  --accent-strong: #E2E8F0;
+
+  /* Dark-mode shadows lean on a subtle glow + darker ambient occlusion
+     rather than a light-mode drop shadow, which reads as a grey smudge on
+     a dark background. */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-3: 0 12px 28px -6px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-4: 0 24px 48px -12px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* Map default headings and buttons to display font (Montserrat) */
+h1, h2, h3, h4, h5, h6, button, .font-display {
+  font-family: var(--font-display);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Visible keyboard focus on every interactive element. Text inputs already
+   got a focus cue from their own focus:border-* utility classes, but
+   buttons, links, and selects across the app had no explicit focus style
+   at all - a keyboard user tabbing through had no way to see where they
+   were. :focus-visible (not :focus) keeps this a keyboard-only affordance,
+   so it never adds an outline around a mouse click. */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #006837;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Premium Design System Token Classes */
+.soft-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-2);
+  border-radius: 16px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.soft-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-3);
+}
+
+.premium-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+}
+.dark .premium-glass {
+  background: rgba(19, 27, 44, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.micro-press {
+  transition: transform 0.1s ease;
+}
+.micro-press:active {
+  transform: scale(0.97);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+
+/* ───────────────────────────────────────────────────────────────────────
+   AZIIKI CARD / SURFACE PRIMITIVES — the redesign's building blocks.
+   Use these instead of ad hoc "bg-white border border-slate-200 rounded-xl"
+   strings so every card in the app shares one visual language and responds
+   to dark mode automatically.
+   ─────────────────────────────────────────────────────────────────────── */
+.az-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+.az-card-interactive:hover {
+  box-shadow: var(--shadow-3);
+  transform: translateY(-2px);
+  border-color: var(--border-default);
+}
+.az-card-inset {
+  background: var(--surface-card-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+
+/* Elevation utility classes, for anything that isn't a full .az-card
+   (dropdown menus, popovers, floating action buttons, toasts). */
+.az-elevation-1 { box-shadow: var(--shadow-1); }
+.az-elevation-2 { box-shadow: var(--shadow-2); }
+.az-elevation-3 { box-shadow: var(--shadow-3); }
+.az-elevation-4 { box-shadow: var(--shadow-4); }
+
+/* Buttons */
+.az-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  border-radius: var(--radius-xl);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+  cursor: pointer;
+}
+.az-btn:active {
+  transform: scale(0.97);
+}
+.az-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.az-btn-primary {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  box-shadow: var(--shadow-2);
+}
+.az-btn-primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-3);
+  filter: brightness(1.06);
+}
+.az-btn-secondary {
+  background: var(--surface-card-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+}
+.az-btn-secondary:hover:not(:disabled) {
+  background: var(--surface-card);
+  border-color: var(--border-strong);
+}
+
+/* Inputs */
+.az-input {
+  background: var(--surface-card-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.az-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface-card);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.az-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Semantic chips — money in / money out / needs attention, used the same
+   way everywhere instead of ad hoc emerald-50/rose-50 pairs per component. */
+.az-chip-positive { background: var(--positive-soft); color: var(--positive); }
+.az-chip-negative { background: var(--negative-soft); color: var(--negative); }
+.az-chip-warning { background: var(--warning-soft); color: var(--warning); }
+.az-chip-accent { background: var(--accent-soft); color: var(--accent); }
+
+/* Gentle hover lift for anything tappable that isn't a full .az-card
+   (list rows, small tiles). Kept subtle - 1-2px, not a bouncy skeuomorphic
+   effect - per the "never distracting" motion guideline. */
+.az-hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+.az-hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Premium Skeleton Shimmer Animations */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.6) 25%,
+    rgba(241, 245, 249, 0.9) 37%,
+    rgba(226, 232, 240, 0.6) 50%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s infinite linear;
+}
+
+.skeleton-pulse {
+  background-color: rgba(226, 232, 240, 0.65);
+  animation: pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AZIIKI DESIGN SYSTEM — dark-mode compatibility shim.
+
+   Screens redesigned with the az-* primitives (Dashboard, and the Billing
+   & PDFs chrome) already use CSS variables directly and need nothing here.
+   Every OTHER screen still uses literal Tailwind utilities like bg-white,
+   text-slate-800, border-slate-200 - hundreds of individual call sites app
+   -wide. Rewriting every one by hand is the real Phase 3+ redesign work;
+   this block is the interim safety net that makes those screens usable
+   and legible in dark mode RIGHT NOW instead of staying broken (invisible
+   dark-on-dark text) until their turn comes.
+
+   How it works: `.dark .bg-white` has higher CSS specificity than the
+   single-class Tailwind utility `.bg-white`, so it wins the cascade
+   whenever the `.dark` class is present on <html> - no @layer or
+   !important needed. Bright, colored elements (bg-emerald-600 buttons,
+   etc.) are deliberately left alone: a green button with white text is
+   already legible on any background, light or dark.
+   ═══════════════════════════════════════════════════════════════════════ */
+.dark .bg-white,
+.dark .bg-slate-50,
+.dark .bg-slate-100,
+.dark .bg-slate-150 {
+  background-color: var(--surface-card-2);
+}
+.dark .bg-slate-200,
+.dark .bg-slate-250,
+.dark .bg-slate-300,
+.dark .bg-slate-350 {
+  background-color: var(--border-default);
+}
+
+.dark .text-slate-800,
+.dark .text-slate-805,
+.dark .text-slate-808,
+.dark .text-slate-850,
+.dark .text-slate-900,
+.dark .text-slate-905,
+.dark .text-slate-950 {
+  color: var(--text-primary);
+}
+.dark .text-slate-500,
+.dark .text-slate-550,
+.dark .text-slate-600,
+.dark .text-slate-650,
+.dark .text-slate-655,
+.dark .text-slate-700,
+.dark .text-slate-750 {
+  color: var(--text-secondary);
+}
+.dark .text-slate-300,
+.dark .text-slate-350,
+.dark .text-slate-400,
+.dark .text-slate-450,
+.dark .text-slate-455 {
+  color: var(--text-tertiary);
+}
+
+.dark .border-slate-100,
+.dark .border-slate-150,
+.dark .border-slate-200,
+.dark .border-slate-205,
+.dark .border-slate-250,
+.dark .border-slate-300,
+.dark .border-slate-350,
+.dark .border-slate-400 {
+  border-color: var(--border-default);
+}
+
+/* Emerald-tinted soft chips/badges (bg-emerald-50 + text-emerald-700, the
+   "success/positive" pill used throughout) - these ARE low-contrast pastel
+   fills, so they do need remapping, unlike solid emerald-600 buttons. */
+.dark .bg-emerald-50 {
+  background-color: var(--positive-soft);
+}
+.dark .text-emerald-600,
+.dark .text-emerald-650,
+.dark .text-emerald-700,
+.dark .text-emerald-750,
+.dark .text-emerald-800,
+.dark .text-emerald-850,
+.dark .text-emerald-900 {
+  color: var(--positive);
+}
+.dark .border-emerald-100,
+.dark .border-emerald-150,
+.dark .border-emerald-200,
+.dark .border-emerald-250 {
+  border-color: color-mix(in srgb, var(--positive) 35%, transparent);
+}
+
+/* Rose/red soft chips (error/negative pills - same reasoning as emerald above). */
+.dark .bg-rose-50,
+.dark .bg-rose-100 {
+  background-color: var(--negative-soft);
+}
+.dark .text-rose-600,
+.dark .text-rose-650,
+.dark .text-rose-700,
+.dark .text-rose-800,
+.dark .text-rose-850 {
+  color: var(--negative);
+}
+.dark .border-rose-100,
+.dark .border-rose-150,
+.dark .border-rose-200,
+.dark .border-rose-300 {
+  border-color: color-mix(in srgb, var(--negative) 35%, transparent);
+}
+
+/* Amber soft chips (warning pills). */
+.dark .bg-amber-50,
+.dark .bg-amber-100 {
+  background-color: var(--warning-soft);
+}
+.dark .text-amber-600,
+.dark .text-amber-700,
+.dark .text-amber-800,
+.dark .text-amber-850 {
+  color: var(--warning);
+}
+.dark .border-amber-100,
+.dark .border-amber-150,
+.dark .border-amber-200,
+.dark .border-amber-250 {
+  border-color: color-mix(in srgb, var(--warning) 35%, transparent);
+}
+
+/* Indigo soft chips (Reports & Wisdom / CRM accent - a secondary accent
+   distinct from the brand teal, used for period selectors and info icons).
+   Solid bg-indigo-600 buttons are left alone, same reasoning as emerald-600. */
+.dark .bg-indigo-50,
+.dark .bg-indigo-100 {
+  background-color: rgba(129, 140, 248, 0.14);
+}
+.dark .text-indigo-600,
+.dark .text-indigo-700,
+.dark .text-indigo-800 {
+  color: #A5B4FC;
+}
+.dark .border-indigo-100,
+.dark .border-indigo-150,
+.dark .border-indigo-200 {
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+/* Purple soft chips (rare, used in a couple of wisdom/report accents). */
+.dark .text-purple-600,
+.dark .text-purple-700,
+.dark .text-purple-800 {
+  color: #C4B5FD;
+}
+
+/* Low-opacity tinted panels (bg-{color}-500/10, border-{color}-500/30) -
+   used by the Investment Wisdom book cards. At 10% opacity these were
+   tuned against a white page and nearly disappear against a dark card, so
+   dark mode gets a slightly stronger, fixed-opacity tint instead of
+   trying to preserve the exact same alpha value. */
+.dark .bg-amber-500\/10 { background-color: rgba(251, 191, 36, 0.12); }
+.dark .bg-indigo-500\/10 { background-color: rgba(129, 140, 248, 0.12); }
+.dark .bg-emerald-500\/10 { background-color: rgba(52, 211, 153, 0.12); }
+.dark .bg-purple-500\/10 { background-color: rgba(196, 181, 253, 0.12); }
+.dark .border-amber-500\/30 { border-color: rgba(251, 191, 36, 0.3); }
+.dark .border-indigo-500\/30 { border-color: rgba(129, 140, 248, 0.3); }
+.dark .border-emerald-500\/30 { border-color: rgba(52, 211, 153, 0.3); }
+.dark .border-purple-500\/30 { border-color: rgba(196, 181, 253, 0.3); }
+
